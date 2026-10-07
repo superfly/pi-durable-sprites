@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/fly-pi-lockup-dark.svg">
+    <img alt="Fly.io and Pi" src="assets/fly-pi-lockup-light.svg" width="320">
+  </picture>
+</p>
+
 # @fly/pi-durable-sprites
 
 Give every AI agent conversation its own computer.
