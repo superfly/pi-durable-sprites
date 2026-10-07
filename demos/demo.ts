@@ -5,6 +5,8 @@
 //
 // DEMO_MODEL picks the model (default claude-sonnet-5-5). demos/pi-durable-sprites.cast is a recording of this script.
 import { randomBytes } from "node:crypto";
+import { existsSync } from "node:fs";
+import { hostname } from "node:os";
 import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import type { AssistantMessage, ToolResultMessage } from "@earendil-works/pi-ai";
 import { anthropicMessagesApi } from "@earendil-works/pi-ai/api/anthropic-messages.lazy";
@@ -77,6 +79,9 @@ const name = `pi-demo-${randomBytes(2).toString("hex")}`;
 process.stdout.write(`  ${yellow("◌")} creating Sprite ${bold(name)} …`);
 const sprite = await client.createSprite(name);
 out(`\r  ${green("●")} Sprite ${bold(name)} is up  ${dim(sprite.url ?? "")}  ${elapsed()}`);
+out();
+out(`  ${dim("harness host")}    ${bold(hostname())}  ${dim("← Pi Durable, its storage and the model key stay here")}`);
+out(`  ${dim("agent's Sprite")}  ${bold(violet(name))}  ${dim("← every file and shell tool of the conversation runs here")}`);
 
 // 2. Pi Durable, with its tools running in that Sprite.
 const sprites = new SpritesEnvPool({ client });
@@ -104,7 +109,7 @@ await sprite.filesystem("/").mkdir("/home/sprite/app", { recursive: true });
 const root = await harness.root(context, {
 	agent: { model: { provider: "anthropic", modelId }, cwd: "/home/sprite/app" },
 });
-out(`  ${green("●")} Pi Durable conversation open  ${dim(`model ${modelId}, tools run in the Sprite`)}`);
+out(`  ${green("●")} Pi Durable conversation open  ${dim(`model ${modelId}`)}`);
 out();
 
 // 3. The task, typed like a user would.
@@ -118,6 +123,8 @@ out();
 
 // 4. Stream the conversation: each tool call as the model makes it, its output as it arrives, and the answer.
 const seen = new Set<EntryId>();
+/** Marks output that came from the agent's Sprite, not this machine. */
+const where = violet(`${name} │`);
 const printedOutput = new Map<string, number>();
 const argsSummary = (name: string, args: Record<string, unknown>): string => {
 	switch (name) {
@@ -147,7 +154,7 @@ const onEntry = (entry: EntryRecord) => {
 			if (part.type === "text" && part.text.trim()) out(`  ${dim(part.text.trim())}`);
 			if (part.type === "toolCall") {
 				const [first, ...rest] = argsSummary(part.name, part.arguments).split("\n");
-				out(`  ${violet("▸")} ${bold(part.name)}  ${first ?? ""}`);
+				out(`  ${violet("▸")} ${bold(part.name)}  ${first ?? ""}  ${dim(`in ${name}`)}`);
 				for (const line of rest) out(`    ${dim(line)}`);
 			}
 		}
@@ -167,8 +174,8 @@ const onLive = (live: LiveState | undefined) => {
 		const fresh = output.slice(printed);
 		printedOutput.set(slot.callId, output.length);
 		const lines = fresh.split("\n").filter((line) => line.trim() !== "");
-		for (const line of lines.slice(0, 6)) out(`    ${dim("│")} ${dim(line.slice(0, 90))}`);
-		if (lines.length > 6) out(`    ${dim("│ …")} ${dim(`${lines.length - 6} more lines`)}`);
+		for (const line of lines.slice(0, 6)) out(`    ${where} ${dim(line.slice(0, 80))}`);
+		if (lines.length > 6) out(`    ${where} ${dim(`… ${lines.length - 6} more lines`)}`);
 	}
 };
 const view = await root.viewState(context);
@@ -191,12 +198,17 @@ if (settled.status === "done" && settled.type === "input") {
 
 // 5. Don't take the model's word for it: check through the Sprites API.
 out();
-out(`  ${dim("checking through the Sprites API")}`);
+out(`  ${dim(`checking from ${hostname()}, through the Sprites API`)}`);
+const here = existsSync("/home/sprite/app/server.js");
+const there = await sprite.filesystem("/home/sprite/app").stat("server.js").catch(() => undefined);
+out(
+	`  ${!here && there ? green("✓") : red("✗")} server.js  ${dim(`${here ? "found" : "not"} on ${hostname()}`)}  ·  ${dim(there ? `${there.size} bytes in ${name}` : `missing in ${name}`)}`,
+);
 const service = await sprite.getService("web");
-out(`  ${service.state?.status === "running" ? green("✓") : red("✗")} service web ${dim(service.state?.status ?? "missing")}`);
+out(`  ${service.state?.status === "running" ? green("✓") : red("✗")} service web ${dim(`${service.state?.status ?? "missing"} in ${name}`)}`);
 const curl = String((await sprite.execFile("curl", ["-s", "http://localhost:8080"])).stdout).trim().replace(/\s+/g, " ");
 // A Sprite's hostname is its name.
-out(`  ${curl.includes(name) ? green("✓") : red("✗")} curl localhost:8080 → ${dim(curl.slice(0, 70))}`);
+out(`  ${curl.includes(name) ? green("✓") : red("✗")} curl localhost:8080 ${dim(`in ${name}`)} → ${dim(curl.slice(0, 60))}`);
 const checkpoint = (await sprite.listCheckpoints()).find((entry) => entry.comment === "hello server");
 out(`  ${checkpoint ? green("✓") : red("✗")} checkpoint ${dim(checkpoint ? `${checkpoint.id} "${checkpoint.comment}"` : "missing")}`);
 

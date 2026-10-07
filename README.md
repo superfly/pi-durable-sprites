@@ -29,7 +29,7 @@ that Sprite and runs every file operation and command there.
 ## Demo
 
 A real model builds and runs a web service inside a fresh Sprite, every tool call streamed as it happens, then the
-result is checked through the Sprites API and the Sprite is deleted. 24 seconds, start to finish.
+result is checked through the Sprites API and the Sprite is deleted. About 30 seconds, start to finish. The harness runs on one machine; every tool call shows the Sprite it ran in.
 
 <p align="center"><img alt="Terminal recording of the demo" src="demos/pi-durable-sprites.gif" width="800"></p>
 
