@@ -1,0 +1,54 @@
+{
+	"name": "@fly/pi-durable-sprites",
+	"version": "0.1.0",
+	"description": "Run Pi Durable tools in Fly.io Sprites: an ExecutionEnv per Sprite, plus an extension with Sprite checkpoints, services and URLs",
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json",
+		"check": "tsc --noEmit",
+		"test": "vitest --run",
+		"example": "node examples/sprite-per-conversation.ts",
+		"prepublishOnly": "rm -rf dist && npm run build"
+	},
+	"keywords": [
+		"pi",
+		"pi-durable",
+		"sprites",
+		"fly.io",
+		"sandbox",
+		"agents"
+	],
+	"author": "Fly.io",
+	"license": "MIT",
+	"engines": {
+		"node": ">=24.0.0"
+	},
+	"dependencies": {
+		"@earendil-works/chord": "^1.1.0",
+		"@earendil-works/pi-durable": "^1.1.0",
+		"@earendil-works/pi-env": "~1.1.0",
+		"@fly/sprites": "^0.2.3",
+		"typebox": "^1.3.27"
+	},
+	"devDependencies": {
+		"@earendil-works/pi-ai": "^1.1.0",
+		"@types/node": "^24.0.0",
+		"typescript": "^5.9.0",
+		"vitest": "4.1.11"
+	}
+}
