@@ -28,8 +28,11 @@ that Sprite and runs every file operation and command there.
 
 ## Demo
 
-A real model builds and runs a web service inside a fresh Sprite, every tool call streamed as it happens, then the
-result is checked through the Sprites API and the Sprite is deleted. About 30 seconds, start to finish. The harness runs on one machine; every tool call shows the Sprite it ran in.
+A real model builds and runs a web service inside a fresh Sprite, every tool call streamed as it happens. Halfway
+through, the harness process is killed with SIGKILL. A second process opens the same SQLite file, resumes, and the
+conversation continues where it stopped: the model is told which tool call was interrupted, and the Sprite still has
+everything written before the crash. The result is then checked through the Sprites API and the Sprite is deleted.
+About 35 seconds, start to finish.
 
 <p align="center"><img alt="Terminal recording of the demo" src="demos/pi-durable-sprites.gif" width="800"></p>
 
