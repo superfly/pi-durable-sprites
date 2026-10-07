@@ -28,6 +28,22 @@ that Sprite and runs every file operation and command there.
 
 ## What's in the package
 
+The package does two different jobs.
+
+**The environment** (required) decides *where* the agent's work happens. When the agent reads a file, edits code or runs
+a command, it happens inside the conversation's Sprite instead of on your server. The agent doesn't know or care: its
+normal tools (read, write, edit, bash) just work there.
+
+**The extension** (optional) adds things the agent can *do* only because it's on a Sprite:
+
+- New tools the model can call: save a checkpoint, roll back to one, run a server as a service, get the Sprite's URL.
+- A note in the system prompt telling the model it's working in a Sprite, and how to use it well.
+
+Without the extension, the agent still works in the Sprite; it just doesn't know it's there or use those features. The
+environment gives the agent a computer; the extension teaches the agent what that computer can do.
+
+In code:
+
 - **`SpritesExecutionEnv`**: a Pi Durable `ExecutionEnv` whose files and commands live in one Sprite. It passes Pi
   Durable's `ExecutionEnv` conformance suite against a real Sprite, with native and with polling watches.
 - **`SpritesEnvPool`**: environments for many Sprites with one connection per Sprite, made for the Harness `env`
