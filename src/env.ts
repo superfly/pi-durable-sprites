@@ -52,9 +52,12 @@ export interface SpritesExecutionEnvOptions extends SpriteConnectionOptions {
 export class SpritesExecutionEnv extends RemoteExecutionEnv {
 	readonly sprite: Sprite;
 	readonly daemon: DaemonConnection;
+	/** Whether this environment made its connection, so `close()` may stop it; a shared one belongs to its owner. */
+	readonly #ownsConnection: boolean;
 
 	constructor(options: SpritesExecutionEnvOptions) {
 		const daemon = options.connection ?? connectSprite(options.sprite, options);
+		const ownsConnection = options.connection === undefined;
 		super({
 			// `DaemonConnection` has `Connection`'s public interface; only its transport differs.
 			connection: daemon as unknown as Connection,
@@ -66,10 +69,14 @@ export class SpritesExecutionEnv extends RemoteExecutionEnv {
 		});
 		this.sprite = options.sprite;
 		this.daemon = daemon;
+		this.#ownsConnection = ownsConnection;
 	}
 
-	/** Stop the daemon, which kills every command it still runs. The environment cannot be used afterwards. */
+	/**
+	 * Stop the daemon, which kills every command it still runs; the environment cannot be used afterwards. With a shared
+	 * `connection`, such as one from `SpritesEnvPool`, this does nothing: close it through its owner (`pool.release()`).
+	 */
 	close(): void {
-		this.daemon.close();
+		if (this.#ownsConnection) this.daemon.close();
 	}
 }

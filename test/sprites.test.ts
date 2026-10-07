@@ -2,7 +2,7 @@ import { BACKGROUND_CONTEXT, withAbortSignal } from "@earendil-works/chord/conte
 import { getOrThrow } from "@earendil-works/pi-durable/env";
 import type { Sprite } from "@fly/sprites";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { deployDaemon, SpritesExecutionEnv } from "../src/index.ts";
+import { deployDaemon, SpritesEnvPool, SpritesExecutionEnv } from "../src/index.ts";
 import { testSprite, token } from "./sprite.ts";
 
 const context = BACKGROUND_CONTEXT;
@@ -132,6 +132,23 @@ describe.skipIf(token === undefined)("SpritesExecutionEnv in a real Sprite", () 
 			expect(getOrThrow(await env.readTextFile("restart.txt", context))).toBe("kept");
 		} finally {
 			env.close();
+		}
+	});
+
+	it("close() on a pooled environment leaves the pool's connection alone", async () => {
+		const pool = new SpritesEnvPool({ client: sprite.client });
+		try {
+			const first = pool.env(sprite.name, { cwd: "/tmp" });
+			getOrThrow(await first.exec(["true"], undefined, context));
+			first.close();
+			expect(getOrThrow(await pool.env(sprite.name, { cwd: "/tmp" }).exec(["true"], undefined, context)).exitCode).toBe(0);
+			const watcher = getOrThrow(await pool.env(sprite.name, { cwd: "/tmp" }).watch([{ path: "w.txt" }], () => {}, context));
+			expect(watcher.mode).toBe("native");
+			await watcher.close(context);
+			pool.release(sprite.name);
+			expect(await pool.env(sprite.name, { cwd: "/tmp" }).exec(["true"], undefined, context)).toMatchObject({ ok: true });
+		} finally {
+			pool.close();
 		}
 	});
 

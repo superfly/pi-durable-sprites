@@ -15,6 +15,7 @@
 	},
 	"files": [
 		"dist",
+		"assets",
 		"README.md",
 		"LICENSE"
 	],
@@ -35,17 +36,25 @@
 	],
 	"author": "Fly.io",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/superfly/pi-durable-sprites.git"
+	},
+	"homepage": "https://github.com/superfly/pi-durable-sprites#readme",
+	"bugs": {
+		"url": "https://github.com/superfly/pi-durable-sprites/issues"
+	},
 	"engines": {
 		"node": ">=24.0.0"
 	},
 	"dependencies": {
-		"@earendil-works/chord": "^1.1.0",
 		"@earendil-works/pi-durable": "^1.1.0",
 		"@earendil-works/pi-env": "~1.1.0",
 		"@fly/sprites": "^0.2.3",
-		"typebox": "^1.3.27"
+		"typebox": "1.3.27"
 	},
 	"devDependencies": {
+		"@earendil-works/chord": "^1.1.0",
 		"@earendil-works/pi-ai": "^1.1.0",
 		"@types/node": "^24.0.0",
 		"typescript": "^5.9.0",
