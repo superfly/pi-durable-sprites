@@ -1,8 +1,25 @@
 # @fly/pi-durable-sprites
 
-Run the tools of [Pi Durable](https://earendil.com/posts/pi-durable/) conversations in [Fly.io Sprites](https://sprites.dev):
-each conversation gets a real Linux machine with bash, package installs and network access, while the Durable
-harness, its storage and your model credentials stay where they are.
+Give every AI agent conversation its own computer.
+
+[Pi Durable](https://earendil.com/posts/pi-durable/) runs long AI agent conversations. When the agent reads a file,
+edits code or runs a command, it does that through a pluggable "execution environment". By default, that is the
+machine Pi Durable itself runs on.
+
+This package makes that environment a [Fly.io Sprite](https://sprites.dev) instead: a small, persistent Linux VM. Each
+conversation gets its own Sprite, so:
+
+- **The agent can do real work.** It has a full shell: it can install packages, run tests, start servers and use the
+  network.
+- **Conversations are isolated.** One conversation's files and processes never touch another's, or your server.
+- **Work is kept.** A Sprite keeps its files when it sleeps, and it can take checkpoints to roll back to.
+- **Nothing else moves.** Pi Durable, its storage and your model API keys stay where they are. Only the agent's tools run
+  in the Sprite.
+
+You give Pi Durable a function that names the Sprite for each conversation. This package does the rest: it connects to
+that Sprite and runs every file operation and command there.
+
+## What's in the package
 
 - **`SpritesExecutionEnv`**: a Pi Durable `ExecutionEnv` whose files and commands live in one Sprite. It passes Pi
   Durable's `ExecutionEnv` conformance suite against a real Sprite, with native and with polling watches.
