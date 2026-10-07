@@ -34,10 +34,16 @@ conversation continues where it stopped: the model is told which tool call was i
 everything written before the crash. The result is then checked through the Sprites API and the Sprite is deleted.
 About 35 seconds, start to finish.
 
-<p align="center"><img alt="Terminal recording of the demo" src="demos/pi-durable-sprites.gif" width="800"></p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="demos/pi-durable-sprites-dark.gif">
+    <img alt="Terminal recording of the demo" src="demos/pi-durable-sprites-light.gif" width="860">
+  </picture>
+</p>
 
 [`demos/demo.ts`](demos/demo.ts) is the script and [`demos/pi-durable-sprites.cast`](demos/pi-durable-sprites.cast)
-the asciinema recording. Run it yourself with `SPRITES_TOKEN=... ANTHROPIC_API_KEY=... npm run demo`.
+the asciinema recording. Run it yourself with `SPRITES_TOKEN=... ANTHROPIC_API_KEY=... npm run demo`;
+[`demos/README.md`](demos/README.md) has the recording pipeline.
 
 ## What's in the package
 
