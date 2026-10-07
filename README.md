@@ -201,8 +201,12 @@ SPRITES_TOKEN=... npm test
 - `test/sprites.test.ts`: deployment, per-command abort, idle stop and restart, restart after the daemon dies, no
   daemon left after `close()`.
 - `test/extension.test.ts`: the extension through a Harness: system prompt, checkpoint and restore, services, URL.
+- `test/e2e.test.ts`: end to end with a real model. It is told to run `seq 1 20000` (the output window), write a Node
+  HTTP server, run it as a service, call it, and checkpoint; the test then checks each result through the Sprites API.
+  Needs `ANTHROPIC_API_KEY`; `ANTHROPIC_BASE_URL` routes through a proxy and `E2E_MODEL` picks the model (default
+  `claude-sonnet-5-5`). About 20 seconds and a few cents.
 
-Without `SPRITES_TOKEN` they are skipped.
+Without `SPRITES_TOKEN` they are skipped, and the end-to-end test also without `ANTHROPIC_API_KEY`.
 
 ## Future work
 
