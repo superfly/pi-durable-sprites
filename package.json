@@ -24,7 +24,8 @@
 		"check": "tsc --noEmit",
 		"test": "vitest --run",
 		"example": "node examples/sprite-per-conversation.ts",
-		"prepublishOnly": "rm -rf dist && npm run build"
+		"prepublishOnly": "rm -rf dist && npm run build",
+		"demo": "node demos/demo.ts"
 	},
 	"keywords": [
 		"pi",

@@ -26,6 +26,16 @@ conversation gets its own Sprite, so:
 You give Pi Durable a function that names the Sprite for each conversation. This package does the rest: it connects to
 that Sprite and runs every file operation and command there.
 
+## Demo
+
+A real model builds and runs a web service inside a fresh Sprite, every tool call streamed as it happens, then the
+result is checked through the Sprites API and the Sprite is deleted. 24 seconds, start to finish.
+
+<p align="center"><img alt="Terminal recording of the demo" src="demos/pi-durable-sprites.gif" width="800"></p>
+
+[`demos/demo.ts`](demos/demo.ts) is the script and [`demos/pi-durable-sprites.cast`](demos/pi-durable-sprites.cast)
+the asciinema recording. Run it yourself with `SPRITES_TOKEN=... ANTHROPIC_API_KEY=... npm run demo`.
+
 ## What's in the package
 
 The package does two different jobs.
