@@ -9,30 +9,10 @@
 
 Give every AI agent conversation its own computer.
 
-[Pi Durable](https://earendil.com/posts/pi-durable/) runs long AI agent conversations. When the agent reads a file,
-edits code or runs a command, it does that through a pluggable "execution environment". By default, that is the
-machine Pi Durable itself runs on.
-
-This package makes that environment a [Fly.io Sprite](https://sprites.dev) instead: a small, persistent Linux VM. Each
-conversation gets its own Sprite, so:
-
-- **The agent can do real work.** It has a full shell: it can install packages, run tests, start servers and use the
-  network.
-- **Conversations are isolated.** One conversation's files and processes never touch another's, or your server.
-- **Work is kept.** A Sprite keeps its files when it sleeps, and it can take checkpoints to roll back to.
-- **Nothing else moves.** Pi Durable, its storage and your model API keys stay where they are. Only the agent's tools run
-  in the Sprite.
-
-You give Pi Durable a function that names the Sprite for each conversation. This package does the rest: it connects to
-that Sprite and runs every file operation and command there.
-
-## Demo
-
-A real model builds and runs a web service inside a fresh Sprite, every tool call streamed as it happens. Halfway
-through, the harness process is killed with SIGKILL. A second process opens the same SQLite file, resumes, and the
-conversation continues where it stopped: the model is told which tool call was interrupted, and the Sprite still has
-everything written before the crash. The result is then checked through the Sprites API and the Sprite is deleted.
-About 35 seconds, start to finish.
+[Pi Durable](https://earendil.com/posts/pi-durable/) runs long agent conversations and checkpoints every step. This
+package makes each conversation's tools run in its own [Fly.io Sprite](https://sprites.dev): a persistent Linux VM with a
+real shell, packages and network. The agent's files and processes never touch your server or another conversation's,
+the Sprite keeps its state when it sleeps, and Pi Durable, its storage and your model keys stay where they are.
 
 <p align="center">
   <picture>
@@ -41,43 +21,21 @@ About 35 seconds, start to finish.
   </picture>
 </p>
 
-[`demos/demo.ts`](demos/demo.ts) is the script and [`demos/pi-durable-sprites.cast`](demos/pi-durable-sprites.cast)
-the asciinema recording. Run it yourself with `SPRITES_TOKEN=... ANTHROPIC_API_KEY=... npm run demo`;
-[`demos/README.md`](demos/README.md) has the recording pipeline.
+<p align="center"><sub>A real model builds a service in a fresh Sprite. Halfway through, the harness is killed with
+SIGKILL; a new process resumes from the same SQLite file and the Sprite still has everything. <a href="demos/">How to
+run it.</a></sub></p>
 
-## What's in the package
-
-The package does two different jobs.
-
-**The environment** (required) decides *where* the agent's work happens. When the agent reads a file, edits code or runs
-a command, it happens inside the conversation's Sprite instead of on your server. The agent doesn't know or care: its
-normal tools (read, write, edit, bash) just work there.
-
-**The extension** (optional) adds things the agent can *do* only because it's on a Sprite:
-
-- New tools the model can call: save a checkpoint, roll back to one, run a server as a service, get the Sprite's URL.
-- A note in the system prompt telling the model it's working in a Sprite, and how to use it well.
-
-Without the extension, the agent still works in the Sprite; it just doesn't know it's there or use those features. The
-environment gives the agent a computer; the extension teaches the agent what that computer can do.
-
-In code:
-
-- **`SpritesExecutionEnv`**: a Pi Durable `ExecutionEnv` whose files and commands live in one Sprite. It passes Pi
-  Durable's `ExecutionEnv` conformance suite against a real Sprite, with native and with polling watches.
-- **`SpritesEnvPool`**: environments for many Sprites with one connection per Sprite, made for the Harness `env`
-  function: one Sprite per conversation.
-- **`createSpritesExtension()`** (optional): tools for the conversation's Sprite (checkpoints, restore, services, its URL)
-  and a system prompt section that tells the model where it works.
+## Install
 
 ```sh
 npm install @fly/pi-durable-sprites @earendil-works/pi-durable @fly/sprites
 ```
 
-## One Sprite per conversation
+## Use
 
-Record each conversation's Sprite in a conversation document and look it up in `env`, which the Harness calls for every
-tool call. `sprites.env()` is cheap: it reuses the Sprite's connection.
+Two parts. **The environment** is required: it moves the agent's own read, write, edit and bash tools into the Sprite.
+**The extension** is optional: it adds Sprite checkpoints, services and the URL as tools, and tells the model where it
+works.
 
 ```ts
 import { createRegistry, defineDoc, Harness } from "@earendil-works/pi-durable";
@@ -85,17 +43,8 @@ import { CodingTools } from "@earendil-works/pi-durable/tools";
 import { SpritesClient } from "@fly/sprites";
 import { createSpritesExtension, SpritesEnvPool } from "@fly/pi-durable-sprites";
 
-const client = new SpritesClient(process.env.SPRITES_TOKEN!);
-const sprites = new SpritesEnvPool({ client });
-
-const SpriteDoc = defineDoc<{ name?: string }>({
-	kind: "app.sprite",
-	version: 1,
-	scope: "conversation",
-	history: "latest",
-	fork: "initial", // a fork gets no Sprite until the app assigns one
-	initial: () => ({}),
-});
+const sprites = new SpritesEnvPool({ client: new SpritesClient(process.env.SPRITES_TOKEN!) });
+const SpriteDoc = defineDoc<{ name?: string }>({ kind: "app.sprite", version: 1, scope: "conversation", history: "latest", fork: "initial", initial: () => ({}) });
 
 const registry = createRegistry();
 registry.install(CodingTools);
@@ -104,133 +53,23 @@ registry.install(createSpritesExtension());
 const harness = await Harness.open(storage, {
 	models,
 	registry,
+	// Called for every tool call: look up the conversation's Sprite and run the tool there.
 	env: async ({ conversationId, cwd, read }, ctx) => {
 		const name = (await read.snapshot(SpriteDoc, conversationId, ctx))?.name;
 		return name === undefined ? undefined : sprites.env(name, { cwd });
 	},
 }, context);
-
-// A new conversation gets a new Sprite, recorded in the creating commit.
-const name = `chat-${crypto.randomUUID()}`;
-await client.createSprite(name);
-const conversation = await harness.createConversation({
-	ownership: { kind: "ownerless" },
-	agent: { model },
-	init: async (tx, id) => {
-		(await tx.doc(SpriteDoc, id)).name = name;
-	},
-}, context);
 ```
 
-[`examples/sprite-per-conversation.ts`](examples/sprite-per-conversation.ts) runs two conversations in two Sprites with a
-scripted model; each writes `note.txt` only in its own Sprite:
+A new conversation gets a new Sprite, recorded in its `SpriteDoc` when it is created. The full version, with the
+per-conversation setup and a single-environment variant, is in [docs/usage.md](docs/usage.md).
 
-```console
-$ SPRITES_TOKEN=... node examples/sprite-per-conversation.ts
---- pi-durable-example-alice-0f58c5: bash output
-pi-durable-example-alice-0f58c5
-/home/sprite
-from alice
---- pi-durable-example-bob-6781a9: bash output
-pi-durable-example-bob-6781a9
-/home/sprite
-from bob
-pi-durable-example-alice-0f58c5: note.txt = "from alice\n"
-pi-durable-example-bob-6781a9: note.txt = "from bob\n"
-```
+## Docs
 
-## One environment
-
-```ts
-import { SpritesExecutionEnv } from "@fly/pi-durable-sprites";
-
-const env = new SpritesExecutionEnv({ sprite: client.sprite("my-sprite"), cwd: "/home/sprite/project" });
-await env.exec("npm test", { onOutput: (text) => process.stdout.write(text) }, context);
-env.close();
-```
-
-| Option | Default | |
-|---|---|---|
-| `sprite` | | The `@fly/sprites` handle. |
-| `cwd` | `/home/sprite` | Where commands start and relative paths resolve. |
-| `id` | `sprites:<name>` | The file namespace; Pi Durable serializes writes to one file by `id` and path. |
-| `idleTimeoutMs` | `60000` | Stop the daemon after this long without work, so the Sprite can sleep. `0`: never. |
-| `watch` | native | `{ mode: "polling", pollIntervalMs }` to poll instead of inotify. |
-| `shellPath`, `shellEnv` | bash | As for Pi Durable's `NodeExecutionEnv`. |
-| `connection` | new | Share one `connectSprite(sprite)` between environments of the same Sprite. |
-
-## Sprites extension
-
-`createSpritesExtension()` adds tools that act on the Sprite of the call's environment:
-
-| Tool | |
-|---|---|
-| `sprite_checkpoint` | Checkpoint the whole Sprite (files, packages, services). |
-| `sprite_checkpoints` | List checkpoints. |
-| `sprite_restore` | Restore a checkpoint. |
-| `sprite_service` | List, create, start, stop, restart, read logs of and delete services: processes the Sprite restarts when it wakes. A service with `http_port` receives the Sprite URL's requests. |
-| `sprite_url` | Show the Sprite's URL and its auth mode. With `createSpritesExtension({ allowPublicUrl: true })` the model may also make it public. |
-
-Its `sprite` system prompt section tells the model it works in a Sprite, that processes started from bash stop when the
-Sprite sleeps, and where its URL points. In conversations whose environment is not a `SpritesExecutionEnv`, the section
-renders nothing and the tools fail.
-
-## How it works
-
-Pi Durable already has a remote execution environment: [pi-env](https://github.com/earendil-works/pi/tree/main/packages/env),
-a small daemon that runs next to the files and speaks a framed protocol on stdin and stdout, and `RemoteExecutionEnv`,
-its client. Its results match `NodeExecutionEnv` running on the remote machine. This package runs that daemon in the
-Sprite and carries its stdin and stdout over a [Sprites exec](https://docs.sprites.dev) WebSocket instead of SSH:
-
-```
-Pi Durable harness ── RemoteExecutionEnv ── DaemonConnection ══ Sprites exec WebSocket ══ pi-env daemon (in the Sprite)
-                                                                                         ├─ files: open, pread, write, rename, readdir, ...
-                                                                                         ├─ exec: bash, per-command kill, timeout, spill, window
-                                                                                         └─ watch: inotify (or polling)
-```
-
-So the Sprite gets everything the issue list asked for, computed next to the files instead of over the network:
-
-- **`window`**: the daemon keeps only the tail Pi Durable asks for and reports the rest as `skipped`, so a command that
-  prints megabytes sends only what the model will see.
-- **Abort and timeout** kill only that command's process group. `cleanup()` kills every command of that environment.
-- **`watch()`** uses inotify in the Sprite (`mode: "native"`), or snapshots with `watch: { mode: "polling" }`.
-- **`openBinaryReader()`, `scanLines()`** read byte ranges and scan lines in the Sprite.
-- **Spills**: over-long output goes to a temporary file in the Sprite, which the `read` tool can page through.
-
-The daemon (≈1.2 MB, the build `@earendil-works/pi-env` ships for Linux x86-64 and arm64) is uploaded on first use
-through the Sprites filesystem API to `~/.pi/env/pi-env-<sha256>`, and its SHA-256 is verified before every start.
-The connection starts it on the first operation, starts it again after the WebSocket is lost (a restore, a network
-blip), and stops it after `idleTimeoutMs` without requests or open handles, so an idle conversation does not keep its
-Sprite awake. Open watches keep it running.
-
-`DaemonConnection` is pi-env's `Connection` with a pluggable transport (see the header of
-[`src/connection.ts`](src/connection.ts)); `@earendil-works/pi-env` is pinned to `~1.1.0` to keep the frame protocol in
-step.
-
-## Tests
-
-The tests run against real Sprites; each file creates its own Sprite and deletes it afterwards.
-
-```sh
-SPRITES_TOKEN=... npm test
-```
-
-- `test/conformance.test.ts`: Pi Durable's `registerEnvConformance()` suite, with native and with polling watches.
-- `test/sprites.test.ts`: deployment, per-command abort, idle stop and restart, restart after the daemon dies, no
-  daemon left after `close()`.
-- `test/extension.test.ts`: the extension through a Harness: system prompt, checkpoint and restore, services, URL.
-- `test/e2e.test.ts`: end to end with a real model. It is told to run `seq 1 20000` (the output window), write a Node
-  HTTP server, run it as a service, call it, and checkpoint; the test then checks each result through the Sprites API.
-  Needs `ANTHROPIC_API_KEY`; `ANTHROPIC_BASE_URL` routes through a proxy and `E2E_MODEL` picks the model (default
-  `claude-sonnet-5-5`). About 20 seconds and a few cents.
-
-Without `SPRITES_TOKEN` they are skipped, and the end-to-end test also without `ANTHROPIC_API_KEY`.
-
-## Future work
-
-Pi Durable can fork a conversation. When Sprites can fork a Sprite, a conversation fork can fork its Sprite's file system
-too; until then a fork starts without a Sprite (`fork: "initial"` above) and the app assigns one.
+- [Usage](docs/usage.md): one Sprite per conversation, one environment, options, the extension's tools.
+- [How it works](docs/how-it-works.md): pi-env over a Sprites exec WebSocket, daemon lifecycle, what runs where.
+- [Testing](docs/testing.md): the conformance, integration and end-to-end suites, and how to run them.
+- [Demo](demos/README.md): the recording and how to reproduce it.
 
 ## License
 
