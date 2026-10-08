@@ -36,8 +36,8 @@ About 35 seconds, start to finish.
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="demos/pi-durable-sprites-dark.gif">
-    <img alt="Terminal recording of the demo" src="demos/pi-durable-sprites-light.gif" width="860">
+    <source type="image/webp" srcset="demos/pi-durable-sprites.webp">
+    <img alt="Terminal recording of the demo" src="demos/pi-durable-sprites.gif" width="860">
   </picture>
 </p>
 

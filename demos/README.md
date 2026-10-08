@@ -10,10 +10,11 @@ npm run demo
 
 ## Recording
 
-`pi-durable-sprites.cast` is an [asciinema](https://asciinema.org) recording of the script. The GIFs in the README are
-rendered from it with [agg](https://github.com/asciinema/agg), then framed as a terminal window with a drop shadow by
-`frame.py` (Pillow). GitHub strips CSS from READMEs, so the window and shadow are baked into the frames, once for the
-light theme and once for the dark one.
+`pi-durable-sprites.cast` is an [asciinema](https://asciinema.org) recording of the script. The animation in the README
+is rendered from it with [agg](https://github.com/asciinema/agg), then framed as a terminal window with a drop shadow
+by `frame.py` (Pillow). GitHub strips CSS from READMEs, so the window and shadow are baked into the frames. The page
+around the window is transparent with the shadow as real alpha, which GIF cannot do, so the result is an animated WebP;
+a GIF on white is written too as the `<picture>` fallback for viewers without WebP.
 
 ```sh
 # 1. Record (100 columns, 42 rows, pauses capped at 2.5 s).
@@ -24,8 +25,8 @@ agg --font-family "JetBrains Mono" --font-size 16 --speed 1.15 --last-frame-dura
   --theme 171434,f4f3fb,171434,ff5c57,5af78e,f3f99d,57c7ff,ff6ac1,9aedfe,f1f1f0,686868,ff5c57,5af78e,f3f99d,57c7ff,ff6ac1,9aedfe,eff0eb \
   demos/pi-durable-sprites.cast /tmp/raw.gif
 
-# 3. Frame it for both GitHub themes.
-python3 -I demos/frame.py /tmp/raw.gif demos/pi-durable-sprites-light.gif demos/pi-durable-sprites-dark.gif
+# 3. Frame it: the transparent WebP for the README, and the GIF fallback.
+python3 -I demos/frame.py /tmp/raw.gif demos/pi-durable-sprites.webp demos/pi-durable-sprites.gif
 ```
 
 Before committing a new cast, check it holds no secrets: `grep -c "sk-ant\|SPRITES_TOKEN" demos/*.cast` should print 0.
