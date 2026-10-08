@@ -1,13 +1,18 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/fly-pi-lockup-dark.svg">
-    <img alt="Fly.io and Pi" src="assets/fly-pi-lockup-light.svg" width="320">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/fly-pi-banner-dark.svg">
+    <img alt="Fly.io × Pi: every conversation gets its own computer" src="assets/fly-pi-banner-light.svg" width="100%">
   </picture>
 </p>
 
-# @fly/pi-durable-sprites
+<p align="center">
+  <a href="https://github.com/superfly/pi-durable-sprites/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/superfly/pi-durable-sprites/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://earendil.com/posts/pi-durable/"><img alt="Pi Durable" src="https://img.shields.io/badge/Pi%20Durable-1.1-7C3AED"></a>
+  <a href="https://sprites.dev"><img alt="Fly.io Sprites" src="https://img.shields.io/badge/Fly.io-Sprites-24175B"></a>
+  <img alt="MIT" src="https://img.shields.io/badge/license-MIT-564C73">
+</p>
 
-Give every AI agent conversation its own computer.
+# @fly/pi-durable-sprites
 
 [Pi Durable](https://earendil.com/posts/pi-durable/) runs long agent conversations and checkpoints every step. This
 package makes each conversation's tools run in its own [Fly.io Sprite](https://sprites.dev): a persistent Linux VM with a
