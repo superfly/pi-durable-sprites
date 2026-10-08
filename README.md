@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/fly-pi-banner-dark.svg">
-    <img alt="Fly.io × Pi: every conversation gets its own computer" src="assets/fly-pi-banner-light.svg" width="100%">
+    <img alt="Pi Durable Sprites" src="assets/fly-pi-banner-light.svg" width="100%">
   </picture>
 </p>
 
