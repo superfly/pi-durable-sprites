@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/fly-pi-banner-dark.svg">
-    <img alt="Pi Durable Sprites" src="assets/fly-pi-banner-light.svg" width="100%">
+    <img alt="Fly.io × Pi: @fly/pi-durable-sprites" src="assets/fly-pi-banner-light.svg" width="100%">
   </picture>
 </p>
 
@@ -12,7 +12,7 @@
   <img alt="MIT" src="https://img.shields.io/badge/license-MIT-564C73">
 </p>
 
-# @fly/pi-durable-sprites
+<h1 align="center">Pi Durable Sprites</h1>
 
 [Pi Durable](https://earendil.com/posts/pi-durable/) runs long agent conversations and checkpoints every step. This
 package makes each conversation's tools run in its own [Fly.io Sprite](https://sprites.dev): a persistent Linux VM with a
