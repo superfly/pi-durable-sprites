@@ -37,7 +37,11 @@ describe.skipIf(token === undefined)("SpritesExecutionEnv in a real Sprite", () 
 		expect(await deployDaemon(sprite)).toBe(first);
 		const listing = await sprite.execFile("sh", ["-c", 'ls -a "$HOME/.pi/env"']);
 		// No leftover uploads.
-		expect(String(listing.stdout).split("\n").filter((name) => name.endsWith(".tmp"))).toEqual([]);
+		expect(
+			String(listing.stdout)
+				.split("\n")
+				.filter((name) => name.endsWith(".tmp")),
+		).toEqual([]);
 	});
 
 	it("replaces a daemon whose content changed", async () => {
@@ -141,12 +145,18 @@ describe.skipIf(token === undefined)("SpritesExecutionEnv in a real Sprite", () 
 			const first = pool.env(sprite.name, { cwd: "/tmp" });
 			getOrThrow(await first.exec(["true"], undefined, context));
 			first.close();
-			expect(getOrThrow(await pool.env(sprite.name, { cwd: "/tmp" }).exec(["true"], undefined, context)).exitCode).toBe(0);
-			const watcher = getOrThrow(await pool.env(sprite.name, { cwd: "/tmp" }).watch([{ path: "w.txt" }], () => {}, context));
+			expect(getOrThrow(await pool.env(sprite.name, { cwd: "/tmp" }).exec(["true"], undefined, context)).exitCode).toBe(
+				0,
+			);
+			const watcher = getOrThrow(
+				await pool.env(sprite.name, { cwd: "/tmp" }).watch([{ path: "w.txt" }], () => {}, context),
+			);
 			expect(watcher.mode).toBe("native");
 			await watcher.close(context);
 			pool.release(sprite.name);
-			expect(await pool.env(sprite.name, { cwd: "/tmp" }).exec(["true"], undefined, context)).toMatchObject({ ok: true });
+			expect(await pool.env(sprite.name, { cwd: "/tmp" }).exec(["true"], undefined, context)).toMatchObject({
+				ok: true,
+			});
 		} finally {
 			pool.close();
 		}

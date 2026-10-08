@@ -1,23 +1,17 @@
 name: CI
 
+# Lint, typecheck and build. No secrets: the test suite needs real Sprites and runs locally (docs/testing.md).
 on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:
-    inputs:
-      e2e:
-        description: Also run the end-to-end test with a real model (needs the ANTHROPIC_API_KEY secret)
-        type: boolean
-        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Typecheck and build
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,39 +20,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm run lint
       - run: npm run check
       - run: npm run build
-
-  test:
-    name: Tests against real Sprites
-    runs-on: ubuntu-latest
-    needs: check
-    # Every test creates a Sprite and needs the token; without the secret (forks) they skip, so this stays green.
-    env:
-      SPRITES_TOKEN: ${{ secrets.SPRITES_TOKEN }}
-      ANTHROPIC_API_KEY: ${{ inputs.e2e && secrets.ANTHROPIC_API_KEY || '' }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - name: Note when the Sprite tests are skipped
-        if: env.SPRITES_TOKEN == ''
-        run: echo "::warning::SPRITES_TOKEN is not set; every Sprite test is skipped"
-      - run: npm test -- --reporter=verbose
-      - name: Delete Sprites a cancelled or failed run left behind
-        if: always() && env.SPRITES_TOKEN != ''
-        run: |
-          cat > cleanup.mjs <<'EOF'
-          import { SpritesClient } from "@fly/sprites";
-          const client = new SpritesClient(process.env.SPRITES_TOKEN);
-          for (const prefix of ["pi-durable-", "pi-demo-"]) {
-            for (const sprite of await client.listAllSprites(prefix)) {
-              console.log("deleting leftover", sprite.name);
-              await client.deleteSprite(sprite.name);
-            }
-          }
-          EOF
-          node cleanup.mjs
+      - name: The published tarball holds what it should
+        run: npm pack --dry-run 2>&1 | grep -E "dist/index\.js|assets/fly-pi-lockup-light\.svg|README\.md|LICENSE"

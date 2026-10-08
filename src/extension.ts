@@ -1,4 +1,10 @@
-import { defineExtension, defineTool, type Extension, section, type ToolExecutionApi } from "@earendil-works/pi-durable";
+import {
+	defineExtension,
+	defineTool,
+	type Extension,
+	section,
+	type ToolExecutionApi,
+} from "@earendil-works/pi-durable";
 import type { ExecutionEnv } from "@earendil-works/pi-durable/env";
 import type { ServiceLogStream, Sprite, StreamMessage } from "@fly/sprites";
 import { Type } from "typebox";

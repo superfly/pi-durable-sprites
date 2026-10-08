@@ -1,4 +1,4 @@
-export { type DaemonConnectionOptions, DaemonConnection, type DaemonProcess } from "./connection.ts";
+export { DaemonConnection, type DaemonConnectionOptions, type DaemonProcess } from "./connection.ts";
 export {
 	connectSprite,
 	DEFAULT_CWD,
@@ -7,6 +7,6 @@ export {
 	SpritesExecutionEnv,
 	type SpritesExecutionEnvOptions,
 } from "./env.ts";
+export { createSpritesExtension, type SpritesExtensionOptions } from "./extension.ts";
 export { SpritesEnvPool, type SpritesEnvPoolOptions } from "./pool.ts";
 export { deployDaemon, openDaemon } from "./transport.ts";
-export { createSpritesExtension, type SpritesExtensionOptions } from "./extension.ts";

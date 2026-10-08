@@ -1,6 +1,11 @@
 import type { Sprite, SpritesClient } from "@fly/sprites";
 import type { DaemonConnection } from "./connection.ts";
-import { connectSprite, type SpriteConnectionOptions, SpritesExecutionEnv, type SpritesExecutionEnvOptions } from "./env.ts";
+import {
+	connectSprite,
+	type SpriteConnectionOptions,
+	SpritesExecutionEnv,
+	type SpritesExecutionEnvOptions,
+} from "./env.ts";
 
 export interface SpritesEnvPoolOptions extends SpriteConnectionOptions {
 	client: SpritesClient;

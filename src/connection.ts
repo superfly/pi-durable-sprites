@@ -345,8 +345,7 @@ export class DaemonConnection {
 			try {
 				if (9 + jsonLength > length) throw new Error("JSON length out of range");
 				const parsed: unknown = JSON.parse(body.subarray(9, 9 + jsonLength).toString("utf8"));
-				if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
-					throw new Error("not an object");
+				if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("not an object");
 				json = parsed as Json;
 			} catch {
 				this.#teardown(session, lost("Corrupt frame from pi-env"));

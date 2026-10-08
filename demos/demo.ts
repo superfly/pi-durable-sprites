@@ -156,7 +156,11 @@ async function worker(mode: "run" | "resume") {
 			const message = entry.model?.[0] as ToolResultMessage | undefined;
 			if (message?.isError) {
 				const text = message.content.map((part) => (part.type === "text" ? part.text : "")).join("");
-				const line = text.trim().split("\n").find((candidate) => candidate.includes("[error]")) ?? "";
+				const line =
+					text
+						.trim()
+						.split("\n")
+						.find((candidate) => candidate.includes("[error]")) ?? "";
 				out(`    ${red("✗")} ${red(line.replace("[error] ", ""))}`);
 			} else out(`    ${green("✓")} ${elapsed()}`);
 		}
@@ -203,7 +207,10 @@ async function worker(mode: "run" | "resume") {
 	if (settled.status === "done" && settled.type === "input") {
 		const entry = await root.commit((tx) => tx.entry(AssistantEntry, settled.answer), context);
 		const message = entry?.model?.[0] as AssistantMessage | undefined;
-		const text = (message?.content ?? []).map((part) => (part.type === "text" ? part.text : "")).join("").trim();
+		const text = (message?.content ?? [])
+			.map((part) => (part.type === "text" ? part.text : ""))
+			.join("")
+			.trim();
 		out();
 		for (const line of wrap(text)) out(`  ${bold(line)}`);
 	} else {
@@ -231,8 +238,12 @@ async function main() {
 	const storage = await mkdtemp(join(tmpdir(), "pi-durable-demo-"));
 	out(`\r  ${green("●")} Sprite ${bold(name)} is up  ${dim(sprite.url ?? "")}  ${elapsed()}`);
 	out();
-	out(`  ${dim("harness host")}    ${bold(hostname())}  ${dim("← Pi Durable, its SQLite file and the model key stay here")}`);
-	out(`  ${dim("agent's Sprite")}  ${bold(violet(name))}  ${dim("← every file and shell tool of the conversation runs here")}`);
+	out(
+		`  ${dim("harness host")}    ${bold(hostname())}  ${dim("← Pi Durable, its SQLite file and the model key stay here")}`,
+	);
+	out(
+		`  ${dim("agent's Sprite")}  ${bold(violet(name))}  ${dim("← every file and shell tool of the conversation runs here")}`,
+	);
 	out();
 
 	// 2. The task, typed like a user would.
@@ -272,7 +283,9 @@ async function main() {
 	});
 	if (first === null) {
 		out();
-		out(`  ${red("✗")} ${red(bold("harness process 1 killed with SIGKILL"))}  ${dim(`while ${killedDuring} was running`)}  ${elapsed()}`);
+		out(
+			`  ${red("✗")} ${red(bold("harness process 1 killed with SIGKILL"))}  ${dim(`while ${killedDuring} was running`)}  ${elapsed()}`,
+		);
 		out(`    ${dim("no shutdown, no goodbye: the same as a crash, an OOM kill or a deploy")}`);
 		await sleep(1800);
 		out();
@@ -287,17 +300,28 @@ async function main() {
 	out();
 	out(`  ${dim(`checking from ${hostname()}, through the Sprites API`)}`);
 	const here = existsSync("/home/sprite/app/server.js");
-	const there = await sprite.filesystem("/home/sprite/app").stat("server.js").catch(() => undefined);
+	const there = await sprite
+		.filesystem("/home/sprite/app")
+		.stat("server.js")
+		.catch(() => undefined);
 	out(
 		`  ${!here && there ? green("✓") : red("✗")} server.js  ${dim(`${here ? "found" : "not"} on ${hostname()}`)}  ·  ${dim(there ? `${there.size} bytes in ${name}, written before the crash` : `missing in ${name}`)}`,
 	);
 	const service = await sprite.getService("web");
-	out(`  ${service.state?.status === "running" ? green("✓") : red("✗")} service web ${dim(`${service.state?.status ?? "missing"} in ${name}`)}`);
-	const curl = String((await sprite.execFile("curl", ["-s", "http://localhost:8080"])).stdout).trim().replace(/\s+/g, " ");
+	out(
+		`  ${service.state?.status === "running" ? green("✓") : red("✗")} service web ${dim(`${service.state?.status ?? "missing"} in ${name}`)}`,
+	);
+	const curl = String((await sprite.execFile("curl", ["-s", "http://localhost:8080"])).stdout)
+		.trim()
+		.replace(/\s+/g, " ");
 	// A Sprite's hostname is its name.
-	out(`  ${curl.includes(name) ? green("✓") : red("✗")} curl localhost:8080 ${dim(`in ${name}`)} → ${dim(curl.slice(0, 60))}`);
+	out(
+		`  ${curl.includes(name) ? green("✓") : red("✗")} curl localhost:8080 ${dim(`in ${name}`)} → ${dim(curl.slice(0, 60))}`,
+	);
 	const checkpoint = (await sprite.listCheckpoints()).find((entry) => entry.comment === "hello server");
-	out(`  ${checkpoint ? green("✓") : red("✗")} checkpoint ${dim(checkpoint ? `${checkpoint.id} "${checkpoint.comment}"` : "missing")}`);
+	out(
+		`  ${checkpoint ? green("✓") : red("✗")} checkpoint ${dim(checkpoint ? `${checkpoint.id} "${checkpoint.comment}"` : "missing")}`,
+	);
 
 	// 6. Clean up.
 	await sleep(600);

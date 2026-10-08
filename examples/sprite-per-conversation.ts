@@ -35,7 +35,9 @@ const faux = fauxProvider();
 const models = createModels();
 models.setProvider(faux.provider);
 const turn = (user: string) => [
-	fauxAssistantMessage(fauxToolCall("write", { path: "note.txt", content: `from ${user}\n` }), { stopReason: "toolUse" }),
+	fauxAssistantMessage(fauxToolCall("write", { path: "note.txt", content: `from ${user}\n` }), {
+		stopReason: "toolUse",
+	}),
 	fauxAssistantMessage(fauxToolCall("bash", { command: "hostname; pwd; cat note.txt" }), { stopReason: "toolUse" }),
 	fauxAssistantMessage("Saved."),
 ];

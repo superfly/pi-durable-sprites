@@ -18,6 +18,10 @@ Without `SPRITES_TOKEN` every test is skipped. The end-to-end test also needs `A
 routes it through a proxy and `E2E_MODEL` picks the model (default `claude-sonnet-5-5`). It costs a few cents.
 
 ```sh
+npm run lint    # biome: lint and format check
 npm run check   # typecheck src, test, examples and demos
 npm run build   # dist/
 ```
+
+CI (`.github/workflows/ci.yml`) runs those three and checks the tarball's contents on every push and pull request. It
+holds no secrets, so the Sprite tests are not part of it; run them locally before merging.

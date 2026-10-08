@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { BACKGROUND_CONTEXT } from "@earendil-works/chord/context";
 import { getOrThrow } from "@earendil-works/pi-durable/env";
 import { type Sprite, SpritesClient } from "@fly/sprites";
-import { type SpritesExecutionEnv, SpritesEnvPool, type SpritesEnvPoolOptions } from "../src/index.ts";
+import { SpritesEnvPool, type SpritesEnvPoolOptions, type SpritesExecutionEnv } from "../src/index.ts";
 
 /** Integration tests need a Sprites API token; without one they are skipped. */
 export const token = process.env.SPRITES_TOKEN;

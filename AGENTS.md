@@ -26,7 +26,8 @@ services and the URL as tools. Read [docs/how-it-works.md](docs/how-it-works.md)
 ## Commands
 
 ```sh
-npm run check                       # tsc over src, test, examples and demos; run before every commit
+npm run lint                        # biome: lint and format check; `npm run format` applies the fixes
+npm run check                       # tsc over src, test, examples and demos
 npm test                            # needs SPRITES_TOKEN; about 12 s against real Sprites
 npm run build                       # dist/
 SPRITES_TOKEN=... node examples/sprite-per-conversation.ts
@@ -39,7 +40,8 @@ Node 24 runs the TypeScript directly; there is no transpile step for tests, exam
 
 - **Tests use real Sprites and cost real money and time.** Each test file creates a Sprite named `pi-durable-<label>-<hex>`
   and deletes it in `afterAll`. If a run is interrupted, delete leftovers: list Sprites with the `pi-durable-` and
-  `pi-demo-` prefixes and remove them. Never run the suite without `SPRITES_TOKEN` expecting it to test anything; it
+  `pi-demo-` prefixes and remove them, but only when no other run is in progress on the same account; deleting by
+  prefix kills a concurrent run's Sprites too. Never run the suite without `SPRITES_TOKEN` expecting it to test anything; it
   skips.
 - **The end-to-end test and the demo call a real model.** They need `ANTHROPIC_API_KEY` and are skipped without it.
   Do not run them in a loop.
@@ -59,7 +61,8 @@ Node 24 runs the TypeScript directly; there is no transpile step for tests, exam
 
 ## Style
 
-- TypeScript, tabs, `verbatimModuleSyntax`, `.ts` extensions in imports. No lint step; match the surrounding code.
+- TypeScript, tabs, `verbatimModuleSyntax`, `.ts` extensions in imports. Biome lints and formats (`biome.json`); CI
+  runs `npm run lint`, `npm run check` and `npm run build`, and nothing that needs a token.
 - Comments say why, not what, and are full sentences. Keep the density of the file you are in.
 - Errors follow Pi Durable's `Result` convention in `src/`; tools in `src/extension.ts` throw, which Pi turns into an
   error result for the model.
@@ -68,7 +71,7 @@ Node 24 runs the TypeScript directly; there is no transpile step for tests, exam
 
 ## Before you finish
 
-1. `npm run check` passes.
+1. `npm run lint` and `npm run check` pass.
 2. `SPRITES_TOKEN=... npm test` passes, and no `pi-durable-*` or `pi-demo-*` Sprites are left on the account.
 3. If you changed `demos/demo.ts`, re-record and re-render it ([demos/README.md](demos/README.md)) and check the cast
    for secrets.
