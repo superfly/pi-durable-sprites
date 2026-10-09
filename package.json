@@ -47,6 +47,9 @@
 	"bugs": {
 		"url": "https://github.com/superfly/pi-durable-sprites/issues"
 	},
+	"publishConfig": {
+		"access": "public"
+	},
 	"engines": {
 		"node": ">=24.0.0"
 	},
