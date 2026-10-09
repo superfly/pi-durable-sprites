@@ -4,7 +4,7 @@ Guidance for coding agents working in this repository. Humans: the README and `d
 
 ## What this is
 
-`@fly/pi-durable-sprites` makes [Pi Durable](https://earendil.com/posts/pi-durable/) run each conversation's tools
+`@flydotio/pi-durable-sprites` makes [Pi Durable](https://earendil.com/posts/pi-durable/) run each conversation's tools
 (read, write, edit, bash) inside its own [Fly.io Sprite](https://sprites.dev). It does this by running pi-env, Pi's
 remote execution daemon, in the Sprite over a Sprites exec WebSocket. An optional extension adds Sprite checkpoints,
 services and the URL as tools. Read [docs/how-it-works.md](docs/how-it-works.md) before changing anything in `src/`.

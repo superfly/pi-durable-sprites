@@ -1,5 +1,5 @@
 {
-	"name": "@fly/pi-durable-sprites",
+	"name": "@flydotio/pi-durable-sprites",
 	"version": "0.1.0",
 	"description": "Run Pi Durable tools in Fly.io Sprites: an ExecutionEnv per Sprite, plus an extension with Sprite checkpoints, services and URLs",
 	"type": "module",

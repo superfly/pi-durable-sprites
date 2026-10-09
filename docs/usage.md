@@ -32,7 +32,7 @@ tool call. `sprites.env()` is cheap: it reuses the Sprite's connection.
 import { createRegistry, defineDoc, Harness } from "@earendil-works/pi-durable";
 import { CodingTools } from "@earendil-works/pi-durable/tools";
 import { SpritesClient } from "@fly/sprites";
-import { createSpritesExtension, SpritesEnvPool } from "@fly/pi-durable-sprites";
+import { createSpritesExtension, SpritesEnvPool } from "@flydotio/pi-durable-sprites";
 
 const client = new SpritesClient(process.env.SPRITES_TOKEN!);
 const sprites = new SpritesEnvPool({ client });
@@ -103,7 +103,7 @@ Sprite through the pool.
 ## One environment
 
 ```ts
-import { SpritesExecutionEnv } from "@fly/pi-durable-sprites";
+import { SpritesExecutionEnv } from "@flydotio/pi-durable-sprites";
 
 const env = new SpritesExecutionEnv({ sprite: client.sprite("my-sprite"), cwd: "/home/sprite/project" });
 await env.exec("npm test", { onOutput: (text) => process.stdout.write(text) }, context);

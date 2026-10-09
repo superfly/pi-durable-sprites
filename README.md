@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/fly-pi-banner-dark.svg">
-    <img alt="Fly.io × Pi: @fly/pi-durable-sprites" src="assets/fly-pi-banner-light.svg" width="100%">
+    <img alt="Fly.io × Pi: @flydotio/pi-durable-sprites" src="assets/fly-pi-banner-light.svg" width="100%">
   </picture>
 </p>
 
@@ -33,7 +33,7 @@ run it.</a></sub></p>
 ## Install
 
 ```sh
-npm install @fly/pi-durable-sprites @earendil-works/pi-durable @fly/sprites
+npm install @flydotio/pi-durable-sprites @earendil-works/pi-durable @fly/sprites
 ```
 
 ## Use
@@ -46,7 +46,7 @@ works.
 import { createRegistry, defineDoc, Harness } from "@earendil-works/pi-durable";
 import { CodingTools } from "@earendil-works/pi-durable/tools";
 import { SpritesClient } from "@fly/sprites";
-import { createSpritesExtension, SpritesEnvPool } from "@fly/pi-durable-sprites";
+import { createSpritesExtension, SpritesEnvPool } from "@flydotio/pi-durable-sprites";
 
 const sprites = new SpritesEnvPool({ client: new SpritesClient(process.env.SPRITES_TOKEN!) });
 const SpriteDoc = defineDoc<{ name?: string }>({ kind: "app.sprite", version: 1, scope: "conversation", history: "latest", fork: "initial", initial: () => ({}) });
